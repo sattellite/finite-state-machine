@@ -1,15 +1,28 @@
+/**
+ * @typedef {object} FSMConfig
+ * @property {string} initial - initial state for FSM
+ * @property {Object.<string, object>} states - description for all possible states of FSM
+ */
 class FSM {
   /**
    * Creates new FSM instance.
-   * @param {any} config
+   * @param {FSMConfig} config
    */
-  constructor(config) {}
+  constructor(config) {
+    if (!config) {
+      throw new Error('Cannot create new instance without config');
+    }
+    this.state = config.initial;
+    this.config = config;
+  }
 
   /**
    * Returns active state.
    * @returns {String}
    */
-  getState() {}
+  getState() {
+    return this.state;
+  }
 
   /**
    * Goes to specified state.
@@ -26,7 +39,9 @@ class FSM {
   /**
    * Resets FSM state to initial.
    */
-  reset() {}
+  reset() {
+    this.state = this.config.initial;
+  }
 
   /**
    * Returns an array of states for which there are specified event transition rules.
