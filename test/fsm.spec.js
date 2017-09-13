@@ -1,3 +1,4 @@
+/* eslint-disable */
 const FSM = require('../src/fsm');
 
 /** Good luck! :) **/
