@@ -14,6 +14,16 @@ class FSM {
     }
     this.state = config.initial;
     this.config = config;
+    this.history = [];
+    this.historyCursor = -1;
+  }
+
+  _addToHistory(state) {
+    if (this.historyCursor !== (this.history.length - 1)) {
+      this.history = this.history.splice(this.historyCursor, this.history.length);
+    }
+    this.history.push(state);
+    this.historyCursor += 1;
   }
 
   /**
@@ -28,19 +38,32 @@ class FSM {
    * Goes to specified state.
    * @param state
    */
-  changeState(state) {}
+  changeState(state) {
+    if (!this.config.states[state]) {
+      throw new Error('Undeclared state');
+    }
+    this.state = state;
+    this._addToHistory(this.state);
+  }
 
   /**
    * Changes state according to event transition rules.
    * @param event
    */
-  trigger(event) {}
+  trigger(event) {
+    if (!this.config.states[this.state].transitions[event]) {
+      throw new Error('Unknown event for this state');
+    }
+    this.state = this.config.states[this.state].transitions[event];
+    this._addToHistory(this.state);
+  }
 
   /**
    * Resets FSM state to initial.
    */
   reset() {
     this.state = this.config.initial;
+    this._addToHistory(this.state);
   }
 
   /**
@@ -49,26 +72,57 @@ class FSM {
    * @param event
    * @returns {Array}
    */
-  getStates(event) {}
+  getStates(event) {
+    if (!event || event === '') {
+      return Object.keys(this.config.states);
+    }
+
+    return Object.keys(this.config.states).map((state) => {
+      if (this.config.states[state].transitions[event]) {
+        return state;
+      }
+    }).filter(Boolean);
+  }
 
   /**
    * Goes back to previous state.
    * Returns false if undo is not available.
    * @returns {Boolean}
    */
-  undo() {}
+  undo() {
+    if (this.historyCursor < 0) {
+      return false;
+    }
+    this.historyCursor -= 1;
+    if (this.history[this.historyCursor]) {
+      this.state = this.history[this.historyCursor];
+    } else {
+      this.state = this.config.initial;
+    }
+    return true;
+  }
 
   /**
    * Goes redo to state.
    * Returns false if redo is not available.
    * @returns {Boolean}
    */
-  redo() {}
+  redo() {
+    if (this.historyCursor > (this.history.length - 2)) {
+      return false;
+    }
+    this.historyCursor += 1;
+    this.state = this.history[this.historyCursor];
+    return true;
+  }
 
   /**
    * Clears transition history
    */
-  clearHistory() {}
+  clearHistory() {
+    this.history = [];
+    this.historyCursor = -1;
+  }
 }
 
 module.exports = FSM;
