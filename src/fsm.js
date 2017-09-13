@@ -1,7 +1,7 @@
 class FSM {
   /**
    * Creates new FSM instance.
-   * @param config
+   * @param {any} config
    */
   constructor(config) {}
 
